@@ -1,61 +1,102 @@
 :root {
   color-scheme: light dark;
 
-  --gap: clamp(4px, 1.5vmin, 7px);
-  --radius-tile: clamp(8px, 2vmin, 12px);
-  --radius-card: 16px;
-  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  /* 8pxグリッドの余白スケール */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
 
-  --bg: #f3f4f7;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-pill: 999px;
+
+  --font-sans: 'Hiragino Sans', 'Noto Sans JP', system-ui, -apple-system, sans-serif;
+
+  /* 盤面のすき間とタイル角丸は画面幅に追従させる */
+  --gap: clamp(5px, 1.6vmin, 8px);
+  --radius-tile: clamp(9px, 2vmin, 13px);
+
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* ニュートラル(ライト)。低彩度のベースに藍の一点アクセント */
+  --bg: #f4f5f8;
+  --bg-tint: #eceef4;
   --surface: #ffffff;
-  --board: #e7eaf0;
-  --cell: #dadfe8;
-  --text: #1b2230;
-  --text-muted: #5c6675;
-  --border: #dde1e9;
-  --accent: #4f46e5;
+  --surface-2: #f7f8fb;
+  --board: #e4e7ef;
+  --cell: #d4d9e4;
+  --text: #1a1f2b;
+  --text-muted: #5a6474;
+  --text-faint: #8b94a4;
+  --border: #e2e5ed;
+  --border-strong: #ccd2de;
+  --accent: #5046e5;
+  --accent-strong: #4036cf;
   --accent-ink: #ffffff;
-  --accent-weak: rgba(79, 70, 229, 0.12);
-  --shadow: 0 1px 2px rgba(20, 25, 40, 0.06), 0 8px 24px rgba(20, 25, 40, 0.08);
+  --accent-weak: color-mix(in srgb, var(--accent) 10%, transparent);
 
-  /* 和10の対(1+9, 2+8, …)が寒色と暖色の両端で対応する温度ランプ */
-  --t1-bg: #dbe7f2;
-  --t1-fg: #283242;
-  --t2-bg: #c2e3e8;
-  --t2-fg: #173a40;
-  --t3-bg: #a8e0c9;
-  --t3-fg: #123a2c;
-  --t4-bg: #c2e6a3;
-  --t4-fg: #213810;
-  --t5-bg: #ecdf86;
-  --t5-fg: #3b340a;
-  --t6-bg: #f4c873;
-  --t6-fg: #402d08;
-  --t7-bg: #f0a259;
-  --t7-fg: #44290a;
-  --t8-bg: #df5d3e;
-  --t8-fg: #ffffff;
-  --t9-bg: #d23f5f;
-  --t9-fg: #ffffff;
+  --shadow-sm: 0 1px 2px rgba(18, 24, 40, 0.05), 0 1px 1px rgba(18, 24, 40, 0.04);
+  --shadow-md: 0 2px 4px rgba(18, 24, 40, 0.05), 0 8px 24px rgba(18, 24, 40, 0.08);
+  --shadow-board: inset 0 1px 2px rgba(18, 24, 40, 0.06);
+
+  /* 和10の対(1+9, 2+8, …)を寒色と暖色の両端に割り当てた温度ランプ。
+     相方どうしが色相環の反対側に来るので一目で見分けやすい。 */
+  --t1-bg: #d6e4f4; --t1-fg: #22324a;
+  --t2-bg: #c3e6ea; --t2-fg: #103a42;
+  --t3-bg: #aee3c7; --t3-fg: #0f3a2b;
+  --t4-bg: #c7e6a4; --t4-fg: #233909;
+  --t5-bg: #ece08a; --t5-fg: #3d3505;
+  --t6-bg: #f6cd76; --t6-fg: #432d05;
+  --t7-bg: #f2a45c; --t7-fg: #46280a;
+  --t8-bg: #e36b46; --t8-fg: #ffffff;
+  --t9-bg: #d2415f; --t9-fg: #ffffff;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #0f1115;
-    --surface: #171b22;
-    --board: #13161d;
-    --cell: #1d212b;
-    --text: #e7ebf2;
-    --text-muted: #97a1b1;
-    --border: #272d39;
-    --accent: #7c84ff;
-    --accent-ink: #0f1115;
-    --accent-weak: rgba(124, 132, 255, 0.16);
-    --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 12px 32px rgba(0, 0, 0, 0.45);
+    --bg: #0d0f14;
+    --bg-tint: #11141b;
+    --surface: #171b23;
+    --surface-2: #1d222c;
+    --board: #12151d;
+    --cell: #1e2330;
+    --text: #e8ecf4;
+    --text-muted: #98a2b3;
+    --text-faint: #6b7585;
+    --border: #262c39;
+    --border-strong: #333a49;
+    --accent: #8b8cf5;
+    --accent-strong: #a3a4f8;
+    --accent-ink: #0d0f14;
+    --accent-weak: color-mix(in srgb, var(--accent) 16%, transparent);
+
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
+    --shadow-md: 0 2px 6px rgba(0, 0, 0, 0.4), 0 16px 40px rgba(0, 0, 0, 0.45);
+    --shadow-board: inset 0 1px 3px rgba(0, 0, 0, 0.5);
+
+    /* ダークでもタイルは視認性を保つため、寒暖は残しつつ明度を落とす */
+    --t1-bg: #28435f; --t1-fg: #dcebfb;
+    --t2-bg: #1f5159; --t2-fg: #d2f1f5;
+    --t3-bg: #1d5840; --t3-fg: #d2f4e2;
+    --t4-bg: #3a5520; --t4-fg: #e6f6cf;
+    --t5-bg: #5f5618; --t5-fg: #f6efba;
+    --t6-bg: #6f4f14; --t6-fg: #fbe2a6;
+    --t7-bg: #7a3f16; --t7-fg: #f8c89a;
+    --t8-bg: #8a3220; --t8-fg: #ffd9cc;
+    --t9-bg: #87263c; --t9-fg: #ffd2dd;
   }
 }
 
-* {
+*,
+*::before,
+*::after {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -65,25 +106,31 @@ body {
   min-height: 100dvh;
   display: grid;
   place-items: center;
-  padding: clamp(16px, 4vw, 40px);
-  font-family: 'Hiragino Sans', 'Noto Sans JP', system-ui, -apple-system, sans-serif;
+  padding: clamp(var(--space-4), 4vw, var(--space-7));
+  font-family: var(--font-sans);
   color: var(--text);
-  background: var(--bg);
+  background-color: var(--bg);
+  background-image: radial-gradient(
+    130% 110% at 50% -10%,
+    var(--accent-weak),
+    transparent 45%
+  );
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 #app {
-  width: min(100%, 540px);
+  width: min(100%, 520px);
   display: flex;
   flex-direction: column;
-  gap: clamp(16px, 3vw, 24px);
+  gap: var(--space-5);
 }
 
 .stage {
   display: flex;
   flex-direction: column;
-  gap: clamp(14px, 2.5vw, 20px);
+  gap: var(--space-4);
 }
 
 /* ヘッダ */
@@ -91,102 +138,148 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: var(--space-4);
 }
 
 .brand {
   display: flex;
   align-items: center;
-  gap: 12px;
-  color: var(--text);
+  gap: var(--space-3);
+  min-width: 0;
 }
 
 .logo {
-  width: 42px;
-  height: 42px;
+  width: 40px;
+  height: 40px;
   flex-shrink: 0;
+  color: var(--text);
 }
 
 .brand h1 {
-  font-size: 1.5rem;
-  font-weight: 700;
-  letter-spacing: -0.01em;
+  font-size: 1.45rem;
+  font-weight: 750;
+  letter-spacing: -0.015em;
+  line-height: 1.1;
 }
 
 .tagline {
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   color: var(--text-muted);
+  letter-spacing: 0.005em;
 }
 
 .repo-link {
-  font-size: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 0.82rem;
   font-weight: 600;
   color: var(--text-muted);
   text-decoration: none;
-  padding: 7px 14px;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  transition: color 0.18s, border-color 0.18s, background 0.18s;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-pill);
+  transition: color 0.18s var(--ease), background 0.18s var(--ease);
+}
+
+.repo-link svg {
+  width: 16px;
+  height: 16px;
 }
 
 .repo-link:hover {
   color: var(--text);
-  border-color: var(--text-muted);
   background: var(--surface);
 }
 
-/* HUD */
-.hud {
+/* スコアボードと操作 */
+.toolbar {
   display: flex;
-  align-items: stretch;
+  align-items: center;
+  justify-content: space-between;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: var(--space-3);
+}
+
+.scoreboard {
+  display: inline-flex;
+  align-items: stretch;
+  gap: var(--space-5);
+  padding: var(--space-3) var(--space-5);
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
 }
 
 .stat {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  min-width: 76px;
-  padding: 8px 14px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  box-shadow: var(--shadow);
+  gap: 1px;
+}
+
+.stat + .stat {
+  position: relative;
+  padding-left: var(--space-5);
+}
+
+.stat + .stat::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 60%;
+  border-left: 1px solid var(--border);
 }
 
 .stat-label {
-  font-size: 0.68rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  color: var(--text-muted);
+  font-size: 0.66rem;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  color: var(--text-faint);
+  white-space: nowrap;
 }
 
-.stat span:last-child {
-  font-size: 1.25rem;
+.stat-value {
+  font-size: 1.2rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
+  line-height: 1.15;
 }
 
-.spacer {
-  flex: 1 1 auto;
+.stat--score .stat-value {
+  font-size: 1.85rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--accent);
+}
+
+.controls {
+  display: flex;
+  gap: var(--space-2);
 }
 
 button {
   font: inherit;
-  font-weight: 600;
-  font-size: 0.9rem;
+  font-weight: 650;
+  font-size: 0.88rem;
   color: var(--text);
   background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 0 16px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  padding: var(--space-2) var(--space-4);
+  min-height: 42px;
   cursor: pointer;
-  transition: transform 0.12s var(--ease), background 0.18s, border-color 0.18s, opacity 0.18s;
+  transition:
+    transform 0.12s var(--ease),
+    background 0.18s var(--ease),
+    border-color 0.18s var(--ease),
+    opacity 0.18s var(--ease);
 }
 
 button:hover {
-  border-color: var(--text-muted);
+  border-color: var(--text-faint);
+  background: var(--surface-2);
 }
 
 button:active {
@@ -194,7 +287,7 @@ button:active {
 }
 
 button:disabled {
-  opacity: 0.45;
+  opacity: 0.4;
   cursor: not-allowed;
 }
 
@@ -205,7 +298,7 @@ button.primary {
 }
 
 button.primary:hover {
-  filter: brightness(1.06);
+  background: var(--accent-strong);
 }
 
 :focus-visible {
@@ -223,12 +316,12 @@ button.primary:hover {
   position: relative;
   width: 100%;
   aspect-ratio: 1;
-  /* inline-size にすることで、ブロック方向は aspect-ratio で確定したまま
-     盤面の幅基準でタイル文字を cqi スケールできる(size だと高さが崩れる)。 */
+  /* 盤面の幅を基準に cqi でタイル文字をスケールする。
+     inline-size なら高さは aspect-ratio で確定したまま崩れない。 */
   container-type: inline-size;
   background: var(--board);
-  border-radius: var(--radius-card);
-  box-shadow: var(--shadow);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-board);
   touch-action: none;
 }
 
@@ -262,8 +355,8 @@ button.primary:hover {
   border-radius: var(--radius-tile);
   display: grid;
   place-items: center;
-  font-size: 8.5cqi;
-  font-weight: 700;
+  font-size: 8.4cqi;
+  font-weight: 750;
   font-variant-numeric: tabular-nums;
   line-height: 1;
   will-change: transform;
@@ -280,10 +373,10 @@ button.primary:hover {
 .tile.v8 { background-color: var(--t8-bg); color: var(--t8-fg); }
 .tile.v9 { background-color: var(--t9-bg); color: var(--t9-fg); }
 
-/* main.ts がインライン transform に translate を書き込むため、ポップ・消滅は
-   transform と独立に合成される scale / opacity だけで表現し、移動と干渉させない。 */
+/* main.ts がインライン transform で位置を書くため、出現と消滅は transform と
+   独立に合成される scale / opacity だけで表し、移動と干渉させない。 */
 .tile.pop {
-  animation: pop 0.18s var(--ease);
+  animation: pop 0.2s var(--ease-spring);
 }
 
 .tile.vanish {
@@ -293,7 +386,7 @@ button.primary:hover {
 
 @keyframes pop {
   0% { scale: 0.4; opacity: 0; }
-  70% { scale: 1.08; }
+  70% { scale: 1.06; }
   100% { scale: 1; opacity: 1; }
 }
 
@@ -318,7 +411,7 @@ button.primary:hover {
 
 @keyframes combo {
   0% { box-shadow: inset 0 0 0 3px var(--accent); opacity: 0.7; }
-  100% { box-shadow: inset 0 0 0 14px var(--accent); opacity: 0; }
+  100% { box-shadow: inset 0 0 0 16px var(--accent); opacity: 0; }
 }
 
 /* 手詰まりオーバーレイ */
@@ -329,11 +422,12 @@ button.primary:hover {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 14px;
+  gap: var(--space-4);
   border-radius: inherit;
-  background: color-mix(in srgb, var(--surface) 78%, transparent);
-  backdrop-filter: blur(6px);
-  animation: fade 0.25s var(--ease);
+  background: color-mix(in srgb, var(--board) 72%, transparent);
+  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(7px);
+  animation: fade 0.3s var(--ease);
 }
 
 .overlay[hidden] {
@@ -341,8 +435,9 @@ button.primary:hover {
 }
 
 .over-title {
-  font-size: 1.6rem;
-  font-weight: 700;
+  font-size: 1.7rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
 }
 
 .over-score {
@@ -360,12 +455,27 @@ button.primary:hover {
   color: var(--text-muted);
   text-align: center;
   text-wrap: balance;
+  max-width: 46ch;
+  margin-inline: auto;
 }
 
 .site-footer {
   text-align: center;
-  font-size: 0.78rem;
-  color: var(--text-muted);
+  font-size: 0.76rem;
+  color: var(--text-faint);
+}
+
+@media (max-width: 380px) {
+  .scoreboard {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .controls {
+    width: 100%;
+  }
+  .controls button {
+    flex: 1;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
