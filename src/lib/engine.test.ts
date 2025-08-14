@@ -86,6 +86,21 @@ describe('和10の消滅', () => {
     expect(r.state.bestCombo).toBe(2);
   });
 
+  it('3組同時消しは10+20点のボーナスで50点', () => {
+    const s = stateWith([
+      [0, 0, 2],
+      [0, 1, 8],
+      [1, 0, 6],
+      [1, 1, 4],
+      [2, 0, 1],
+      [2, 1, 9],
+    ]);
+    const r = move(s, 'left', createRng(1));
+    expect(r.pairs).toBe(3);
+    expect(r.gained).toBe(50);
+    expect(r.removed).toHaveLength(6);
+  });
+
   it('1枚のタイルが1手で2回消えることはない', () => {
     // [5,5,5] 左寄せ: 先頭の2枚が消え、3枚目は残る
     const s = stateWith([
@@ -122,11 +137,40 @@ describe('手詰まり', () => {
   });
 });
 
+describe('状態の不変性', () => {
+  it('move は受け取った状態を書き換えない', () => {
+    const s = stateWith([
+      [0, 0, 3],
+      [0, 2, 7],
+    ]);
+    const snapshot = structuredClone(s);
+    move(s, 'left', createRng(1));
+    expect(s).toEqual(snapshot);
+  });
+
+  it('有効な手のあとは盤上のタイルが必ず1枚増減する', () => {
+    // 3+7 が消えて2枚減り、スポーンで1枚増えるので差し引き1枚減る
+    const s = stateWith([
+      [0, 0, 3],
+      [0, 2, 7],
+      [3, 3, 5],
+    ]);
+    const r = move(s, 'left', createRng(2));
+    expect(r.state.tiles.length).toBe(s.tiles.length - 1);
+  });
+});
+
 describe('乱数とスポーン', () => {
   it('同じシードからは同じゲームが始まる', () => {
     const a = newGame(createRng(5));
     const b = newGame(createRng(5));
     expect(a.tiles).toEqual(b.tiles);
+  });
+
+  it('新規ゲームはどのシードでも2枚から始まる', () => {
+    for (let seed = 1; seed < 40; seed++) {
+      expect(newGame(createRng(seed)).tiles).toHaveLength(2);
+    }
   });
 
   it('スポーン値は1から9に収まり、小さい値が出やすい', () => {
