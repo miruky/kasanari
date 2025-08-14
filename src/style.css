@@ -125,6 +125,12 @@ body {
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
+  animation: app-in 0.5s var(--ease-out) both;
+}
+
+@keyframes app-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .stage {
@@ -247,11 +253,45 @@ body {
   line-height: 1.15;
 }
 
+.stat--score {
+  position: relative;
+}
+
 .stat--score .stat-value {
   font-size: 1.85rem;
   font-weight: 800;
   letter-spacing: -0.02em;
   color: var(--accent);
+}
+
+.stat-value.bump {
+  animation: bump 0.42s var(--ease-spring);
+}
+
+@keyframes bump {
+  0% { scale: 1; }
+  35% { scale: 1.2; }
+  100% { scale: 1; }
+}
+
+/* 得点の浮き上がり「+N」 */
+.gain {
+  position: absolute;
+  left: 0;
+  bottom: 100%;
+  margin-bottom: 2px;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+  animation: gain 0.85s var(--ease-out) forwards;
+}
+
+@keyframes gain {
+  0% { opacity: 0; transform: translateY(8px) scale(0.9); }
+  28% { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-16px) scale(1); }
 }
 
 .controls {
@@ -270,35 +310,41 @@ button {
   padding: var(--space-2) var(--space-4);
   min-height: 42px;
   cursor: pointer;
+  box-shadow: var(--shadow-sm);
   transition:
     transform 0.12s var(--ease),
     background 0.18s var(--ease),
     border-color 0.18s var(--ease),
+    box-shadow 0.18s var(--ease),
     opacity 0.18s var(--ease);
 }
 
 button:hover {
   border-color: var(--text-faint);
   background: var(--surface-2);
+  transform: translateY(-1px);
 }
 
 button:active {
-  transform: translateY(1px);
+  transform: translateY(0);
 }
 
 button:disabled {
   opacity: 0.4;
   cursor: not-allowed;
+  transform: none;
 }
 
 button.primary {
   color: var(--accent-ink);
   background: var(--accent);
   border-color: transparent;
+  box-shadow: 0 2px 8px var(--accent-weak);
 }
 
 button.primary:hover {
   background: var(--accent-strong);
+  box-shadow: 0 6px 18px var(--accent-weak);
 }
 
 :focus-visible {
@@ -391,7 +437,28 @@ button.primary:hover {
 }
 
 @keyframes vanish {
-  to { scale: 0.2; opacity: 0; }
+  0% { scale: 1; opacity: 1; }
+  35% { scale: 1.12; opacity: 1; }
+  100% { scale: 0.25; opacity: 0; }
+}
+
+/* 消えたマスから広がる輪 */
+.burst {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 25%;
+  height: 25%;
+  border-radius: var(--radius-tile);
+  background: transparent;
+  pointer-events: none;
+  z-index: 3;
+  animation: burst 0.46s var(--ease-out) forwards;
+}
+
+@keyframes burst {
+  0% { box-shadow: 0 0 0 1px var(--accent); opacity: 0.65; scale: 0.82; }
+  100% { box-shadow: 0 0 0 7px var(--accent); opacity: 0; scale: 1.28; }
 }
 
 /* 同時消しのフラッシュ */
@@ -434,6 +501,14 @@ button.primary:hover {
   display: none;
 }
 
+.overlay > * {
+  animation: overlay-in 0.42s var(--ease-out) both;
+}
+
+.overlay > *:nth-child(1) { animation-delay: 0.06s; }
+.overlay > *:nth-child(2) { animation-delay: 0.13s; }
+.overlay > *:nth-child(3) { animation-delay: 0.2s; }
+
 .over-title {
   font-size: 1.7rem;
   font-weight: 800;
@@ -448,6 +523,11 @@ button.primary:hover {
 @keyframes fade {
   from { opacity: 0; }
   to { opacity: 1; }
+}
+
+@keyframes overlay-in {
+  from { opacity: 0; transform: translateY(10px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .help {
