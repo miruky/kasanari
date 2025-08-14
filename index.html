@@ -7,10 +7,9 @@
     <title>kasanari — 足して10で消すスライド数字パズル</title>
     <meta
       name="description"
-      content="足して10になる数字どうしを重ねて消すスライドパズル。連鎖ボーナス、アンドゥ、自動セーブ。キーボードとスワイプで遊べる。"
+      content="足して10になる数字どうしを重ねて消すスライドパズル。4×4から6×6、連鎖ボーナス、何手でも戻せるアンドゥ、配置の共有、ライト・ダーク切替。キーボードとスワイプで遊べる。"
     />
-    <meta name="theme-color" content="#f3f4f7" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#0f1115" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#f4f5f8" />
     <meta property="og:type" content="website" />
     <meta property="og:title" content="kasanari" />
     <meta
@@ -18,6 +17,18 @@
       content="足して10になる数字どうしを重ねて消すスライドパズル。"
     />
     <meta property="og:image" content="%BASE_URL%logo.svg" />
+    <script>
+      // 初回描画前に保存済みテーマを反映し、ちらつきを防ぐ
+      try {
+        var pref = localStorage.getItem('kasanari:theme') || 'system';
+        var dark =
+          pref === 'dark' ||
+          (pref !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches);
+        document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+      } catch (e) {
+        /* localStorage が使えなくても既定テーマで動く */
+      }
+    </script>
   </head>
   <body>
     <div id="app"></div>
