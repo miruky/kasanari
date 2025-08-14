@@ -78,12 +78,15 @@ const board = mustFind<HTMLDivElement>('#board');
 const tilesLayer = mustFind<HTMLDivElement>('#tiles');
 const overlay = mustFind<HTMLDivElement>('#overlay');
 const overScore = mustFind<HTMLParagraphElement>('#over-score');
+const scoreStat = mustFind<HTMLDivElement>('.stat--score');
 const scoreEl = mustFind<HTMLSpanElement>('#score');
 const bestEl = mustFind<HTMLSpanElement>('#best');
 const comboEl = mustFind<HTMLSpanElement>('#combo');
 const btnUndo = mustFind<HTMLButtonElement>('#btn-undo');
 const btnNew = mustFind<HTMLButtonElement>('#btn-new');
 const btnRetry = mustFind<HTMLButtonElement>('#btn-retry');
+
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
 const rng = createRng(Date.now() >>> 0);
 let state: GameState;
@@ -130,17 +133,81 @@ function tilePosition(el: HTMLDivElement, row: number, col: number): void {
   el.style.transform = `translate(${col * 100}%, ${row * 100}%)`;
 }
 
-function createTileEl(id: number, value: number, row: number, col: number): HTMLDivElement {
+function createTileEl(
+  id: number,
+  value: number,
+  row: number,
+  col: number,
+  delayMs = 0,
+): HTMLDivElement {
   const el = document.createElement('div');
   el.className = `tile v${value} pop`;
   el.textContent = String(value);
+  if (delayMs > 0 && !reduceMotion.matches) el.style.animationDelay = `${delayMs}ms`;
   tilePosition(el, row, col);
   tilesLayer.append(el);
   tileEls.set(id, el);
   return el;
 }
 
+/** 値の変化を一瞬の拡大で知らせる。reduced-motionでは何もしない。 */
+function bump(el: HTMLElement): void {
+  if (reduceMotion.matches) return;
+  el.classList.remove('bump');
+  void el.offsetWidth; // アニメーションを確実に再生するためリフローを強制
+  el.classList.add('bump');
+}
+
+let displayedScore = 0;
+let scoreRaf = 0;
+
+/** スコアを目標値までカウントアップする。連打中も現在値から滑らかに継ぐ。 */
+function animateScore(to: number): void {
+  if (reduceMotion.matches) {
+    displayedScore = to;
+    scoreEl.textContent = String(to);
+    return;
+  }
+  cancelAnimationFrame(scoreRaf);
+  const from = displayedScore;
+  if (from === to) return;
+  bump(scoreEl);
+  const dur = Math.min(520, 220 + Math.abs(to - from) * 4);
+  const start = performance.now();
+  const tick = (now: number): void => {
+    const p = Math.min(1, (now - start) / dur);
+    const eased = 1 - Math.pow(1 - p, 3);
+    displayedScore = Math.round(from + (to - from) * eased);
+    scoreEl.textContent = String(displayedScore);
+    if (p < 1) scoreRaf = requestAnimationFrame(tick);
+    else displayedScore = to;
+  };
+  scoreRaf = requestAnimationFrame(tick);
+}
+
+/** 得点をスコアの上に浮かせて消す「+N」表示。 */
+function floatGain(amount: number): void {
+  if (reduceMotion.matches || amount <= 0) return;
+  const el = document.createElement('span');
+  el.className = 'gain';
+  el.textContent = `+${amount}`;
+  scoreStat.append(el);
+  el.addEventListener('animationend', () => el.remove(), { once: true });
+}
+
+/** タイルが消えたマスから広がる輪。 */
+function spawnBurst(row: number, col: number): void {
+  if (reduceMotion.matches) return;
+  const el = document.createElement('div');
+  el.className = 'burst';
+  el.style.transform = `translate(${col * 100}%, ${row * 100}%)`;
+  tilesLayer.append(el);
+  el.addEventListener('animationend', () => el.remove(), { once: true });
+}
+
 function renderHud(): void {
+  cancelAnimationFrame(scoreRaf);
+  displayedScore = state.score;
   scoreEl.textContent = String(state.score);
   bestEl.textContent = String(best);
   comboEl.textContent = String(state.bestCombo);
@@ -150,7 +217,7 @@ function renderHud(): void {
 function renderAll(): void {
   tilesLayer.textContent = '';
   tileEls.clear();
-  for (const t of state.tiles) createTileEl(t.id, t.value, t.row, t.col);
+  state.tiles.forEach((t, i) => createTileEl(t.id, t.value, t.row, t.col, i * 45));
   overlay.hidden = !state.over;
   if (state.over) overScore.textContent = `スコア ${state.score}`;
   renderHud();
@@ -159,6 +226,7 @@ function renderAll(): void {
 function applyMove(dir: Direction): void {
   if (state.over) return;
   const before = state;
+  const beforeBest = best;
   const result = move(state, dir, rng);
   if (!result.moved) return;
   undoState = before;
@@ -166,14 +234,21 @@ function applyMove(dir: Direction): void {
   if (state.score > best) best = state.score;
   persist();
 
-  // 消えるタイルは衝突位置まで滑らせてからフェードさせる
+  // 消えるタイルは衝突位置まで滑らせてからフェードさせ、そのマスに輪を出す
+  const burstCells = new Set<string>();
   for (const t of result.removed) {
     const el = tileEls.get(t.id);
-    if (!el) continue;
-    tilePosition(el, t.row, t.col);
-    el.classList.add('vanish');
-    tileEls.delete(t.id);
-    setTimeout(() => el.remove(), 320);
+    if (el) {
+      tilePosition(el, t.row, t.col);
+      el.classList.add('vanish');
+      tileEls.delete(t.id);
+      setTimeout(() => el.remove(), 320);
+    }
+    const key = `${t.row}:${t.col}`;
+    if (!burstCells.has(key)) {
+      burstCells.add(key);
+      spawnBurst(t.row, t.col);
+    }
   }
 
   const known = new Set<number>();
@@ -194,9 +269,17 @@ function applyMove(dir: Direction): void {
     board.classList.remove('combo-flash');
     requestAnimationFrame(() => board.classList.add('combo-flash'));
   }
+
+  animateScore(state.score);
+  floatGain(result.gained);
+  bestEl.textContent = String(best);
+  comboEl.textContent = String(state.bestCombo);
+  btnUndo.disabled = undoState === null;
+  if (best > beforeBest) bump(bestEl);
+  if (state.bestCombo > before.bestCombo) bump(comboEl);
+
   overlay.hidden = !state.over;
   if (state.over) overScore.textContent = `スコア ${state.score}`;
-  renderHud();
 }
 
 function startNew(): void {

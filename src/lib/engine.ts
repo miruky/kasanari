@@ -1,6 +1,9 @@
+/** 既定の盤面サイズ。状態は size を持ち、各サイズで遊べる。 */
 export const SIZE = 4;
 /** この和になったタイルどうしが消える */
 export const TARGET_SUM = 10;
+/** UIで選べる盤面サイズ */
+export const BOARD_SIZES = [4, 5, 6] as const;
 
 export type Direction = 'up' | 'down' | 'left' | 'right';
 
@@ -12,9 +15,11 @@ export interface Tile {
 }
 
 export interface GameState {
+  /** 正方盤の一辺のマス数 */
+  size: number;
   tiles: Tile[];
   score: number;
-  /** 1手で消えたペア数の累計ではなく、これまでの最大連鎖(同時消し)数 */
+  /** これまでの最大連鎖(1手の同時消し)数 */
   bestCombo: number;
   over: boolean;
   nextId: number;
@@ -43,6 +48,33 @@ export function createRng(seed: number): () => number {
   };
 }
 
+export interface ResumableRng {
+  /** 次の乱数を返し、消費回数を1増やす */
+  next: () => number;
+  /** これまでに消費した乱数の個数 */
+  draws: () => number;
+}
+
+/**
+ * 消費回数を数える乱数。seed と draws を保存しておけば、`skip` で同じ地点から
+ * 続きを再現できる。盤面の再開(リロード復元)と配置の共有が同じ展開になる土台。
+ */
+export function resumableRng(seed: number, skip = 0): ResumableRng {
+  const base = createRng(seed);
+  let count = 0;
+  for (let i = 0; i < skip; i++) {
+    base();
+    count += 1;
+  }
+  return {
+    next: () => {
+      count += 1;
+      return base();
+    },
+    draws: () => count,
+  };
+}
+
 /** 小さい数ほど出やすい重み(10-値)でスポーン値を選ぶ */
 export function spawnValue(rng: () => number): number {
   const weights = Array.from({ length: 9 }, (_, i) => 10 - (i + 1));
@@ -55,11 +87,11 @@ export function spawnValue(rng: () => number): number {
   return 9;
 }
 
-function emptyCells(tiles: readonly Tile[]): { row: number; col: number }[] {
+function emptyCells(tiles: readonly Tile[], size: number): { row: number; col: number }[] {
   const used = new Set(tiles.map((t) => `${t.row}:${t.col}`));
   const out: { row: number; col: number }[] = [];
-  for (let r = 0; r < SIZE; r++) {
-    for (let c = 0; c < SIZE; c++) {
+  for (let r = 0; r < size; r++) {
+    for (let c = 0; c < size; c++) {
       if (!used.has(`${r}:${c}`)) out.push({ row: r, col: c });
     }
   }
@@ -67,15 +99,15 @@ function emptyCells(tiles: readonly Tile[]): { row: number; col: number }[] {
 }
 
 export function spawnTile(state: GameState, rng: () => number): GameState {
-  const cells = emptyCells(state.tiles);
+  const cells = emptyCells(state.tiles, state.size);
   const cell = cells[Math.floor(rng() * cells.length)];
   if (!cell) return state;
   const tile: Tile = { id: state.nextId, value: spawnValue(rng), row: cell.row, col: cell.col };
   return { ...state, tiles: [...state.tiles, tile], nextId: state.nextId + 1 };
 }
 
-export function newGame(rng: () => number): GameState {
-  let state: GameState = { tiles: [], score: 0, bestCombo: 0, over: false, nextId: 1 };
+export function newGame(rng: () => number, size: number = SIZE): GameState {
+  let state: GameState = { size, tiles: [], score: 0, bestCombo: 0, over: false, nextId: 1 };
   state = spawnTile(state, rng);
   state = spawnTile(state, rng);
   return state;
@@ -86,15 +118,15 @@ interface LineSpec {
   cells: { row: number; col: number }[];
 }
 
-function linesFor(dir: Direction): LineSpec[] {
+function linesFor(dir: Direction, size: number): LineSpec[] {
   const lines: LineSpec[] = [];
-  for (let i = 0; i < SIZE; i++) {
+  for (let i = 0; i < size; i++) {
     const cells: { row: number; col: number }[] = [];
-    for (let j = 0; j < SIZE; j++) {
+    for (let j = 0; j < size; j++) {
       if (dir === 'left') cells.push({ row: i, col: j });
-      else if (dir === 'right') cells.push({ row: i, col: SIZE - 1 - j });
+      else if (dir === 'right') cells.push({ row: i, col: size - 1 - j });
       else if (dir === 'up') cells.push({ row: j, col: i });
-      else cells.push({ row: SIZE - 1 - j, col: i });
+      else cells.push({ row: size - 1 - j, col: i });
     }
     lines.push({ cells });
   }
@@ -112,7 +144,7 @@ export function move(state: GameState, dir: Direction, rng: () => number): MoveR
   let moved = false;
   let pairs = 0;
 
-  for (const line of linesFor(dir)) {
+  for (const line of linesFor(dir, state.size)) {
     const lineTiles = line.cells
       .map((c) => byPos.get(`${c.row}:${c.col}`))
       .filter((t): t is Tile => t !== undefined);
@@ -150,13 +182,13 @@ export function move(state: GameState, dir: Direction, rng: () => number): MoveR
     bestCombo: Math.max(state.bestCombo, pairs),
   };
   next = spawnTile(next, rng);
-  next = { ...next, over: isStuck(next.tiles) };
+  next = { ...next, over: isStuck(next.tiles, state.size) };
   return { state: next, moved: true, pairs, removed, gained };
 }
 
 /** 空きがなく、隣接にも和10の組がなければ手詰まり */
-export function isStuck(tiles: readonly Tile[]): boolean {
-  if (tiles.length < SIZE * SIZE) return false;
+export function isStuck(tiles: readonly Tile[], size: number): boolean {
+  if (tiles.length < size * size) return false;
   const grid = new Map(tiles.map((t) => [`${t.row}:${t.col}`, t.value]));
   for (const t of tiles) {
     const right = grid.get(`${t.row}:${t.col + 1}`);
