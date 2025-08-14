@@ -6,12 +6,12 @@ const BEST_KEY = 'kasanari:best';
 const STATE_KEY = 'kasanari:state';
 
 const LOGO_SVG = `<svg viewBox="0 0 64 64" role="img" aria-label="kasanariのロゴ" class="logo">
-  <g fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-    <rect x="8" y="20" width="36" height="36" rx="7"/>
-  </g>
-  <rect x="24" y="8" width="32" height="32" rx="7" fill="var(--accent)" opacity="0.85"/>
-  <text x="40" y="31" text-anchor="middle" font-size="18" font-weight="700" fill="#fff" font-family="system-ui">10</text>
+  <rect x="7" y="20" width="33" height="33" rx="8" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linejoin="round"/>
+  <rect x="24" y="9" width="33" height="33" rx="8" fill="var(--accent)"/>
+  <text x="40.5" y="26.5" text-anchor="middle" dominant-baseline="central" font-size="16" font-weight="700" fill="#fff" font-family="system-ui, sans-serif">10</text>
 </svg>`;
+
+const GITHUB_SVG = `<svg viewBox="0 0 16 16" aria-hidden="true" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 0 1 4 0c1.53-1.03 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>`;
 
 function mustFind<T extends Element>(selector: string): T {
   const el = document.querySelector<T>(selector);
@@ -25,21 +25,35 @@ app.innerHTML = `
   <header class="site-header">
     <div class="brand">
       ${LOGO_SVG}
-      <div>
+      <div class="brand-text">
         <h1>kasanari</h1>
-        <p class="tagline">足して10になる数字を重ねて消すスライドパズル</p>
+        <p class="tagline">足して10で消すスライド数字パズル</p>
       </div>
     </div>
-    <a class="repo-link" href="https://github.com/miruky/kasanari" rel="noopener">GitHub</a>
+    <a class="repo-link" href="https://github.com/miruky/kasanari" rel="noopener" target="_blank">
+      ${GITHUB_SVG}<span>GitHub</span>
+    </a>
   </header>
   <main class="stage">
-    <div class="hud">
-      <div class="stat"><span class="stat-label">スコア</span><span id="score">0</span></div>
-      <div class="stat"><span class="stat-label">ベスト</span><span id="best">0</span></div>
-      <div class="stat"><span class="stat-label">最大同時消し</span><span id="combo">0</span></div>
-      <span class="spacer"></span>
-      <button type="button" id="btn-undo">1手もどす</button>
-      <button type="button" id="btn-new" class="primary">新しいゲーム</button>
+    <div class="toolbar">
+      <div class="scoreboard">
+        <div class="stat stat--score">
+          <span class="stat-label">スコア</span>
+          <span class="stat-value" id="score">0</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">ベスト</span>
+          <span class="stat-value" id="best">0</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">同時消し</span>
+          <span class="stat-value" id="combo">0</span>
+        </div>
+      </div>
+      <div class="controls">
+        <button type="button" id="btn-undo">もどす</button>
+        <button type="button" id="btn-new" class="primary">新しいゲーム</button>
+      </div>
     </div>
     <div class="board-wrap">
       <div class="board" id="board" tabindex="0"
