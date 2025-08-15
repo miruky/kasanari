@@ -248,7 +248,8 @@ body {
   font-size: 0.66rem;
   font-weight: 650;
   letter-spacing: 0.06em;
-  color: var(--text-faint);
+  /* 小さい文字なので WCAG AA(4.5:1)を満たす muted を使う */
+  color: var(--text-muted);
   white-space: nowrap;
 }
 
@@ -377,7 +378,7 @@ button.primary:hover {
 }
 
 .seg-btn {
-  min-height: 34px;
+  min-height: 38px;
   padding: 0 var(--space-3);
   font-size: 0.8rem;
   font-weight: 650;
@@ -482,6 +483,8 @@ button.primary:hover {
   line-height: 1;
   will-change: transform;
   transition: transform 0.13s var(--ease);
+  /* ハイコントラストモードでも数字の見分けに要るタイル色を保つ */
+  forced-color-adjust: none;
 }
 
 .tile.v1 { background-color: var(--t1-bg); color: var(--t1-fg); }
@@ -590,6 +593,10 @@ button.primary:hover {
   letter-spacing: -0.01em;
 }
 
+.overlay.is-record .over-title {
+  color: var(--accent);
+}
+
 .over-score {
   color: var(--text-muted);
   font-variant-numeric: tabular-nums;
@@ -614,17 +621,44 @@ button.primary:hover {
   margin-inline: auto;
 }
 
+.help kbd {
+  display: inline-block;
+  padding: 1px 6px;
+  font-family: var(--font-sans);
+  font-size: 0.82em;
+  font-weight: 700;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  box-shadow: var(--shadow-sm);
+}
+
 .site-footer {
   text-align: center;
   font-size: 0.76rem;
-  color: var(--text-faint);
+  color: var(--text-muted);
+}
+
+/* スクリーンリーダー専用。視覚的には隠すがDOMには残す。 */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
 }
 
 /* 共有のフィードバックなどの短い通知。スクリーンリーダーにも読み上げられる。 */
 .toast {
   position: fixed;
   left: 50%;
-  bottom: var(--space-5);
+  bottom: calc(var(--space-5) + env(safe-area-inset-bottom, 0px));
   transform: translateX(-50%) translateY(10px);
   max-width: calc(100vw - 32px);
   padding: var(--space-2) var(--space-4);
