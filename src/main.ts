@@ -1,5 +1,13 @@
 import './style.css';
-import { BOARD_SIZES, SIZE, isValidState, move, newGame, resumableRng } from './lib';
+import {
+  BOARD_SIZES,
+  SIZE,
+  isValidState,
+  move,
+  newGame,
+  resumableRng,
+  suggestDirection,
+} from './lib';
 import type { Direction, GameState, ResumableRng } from './lib';
 
 const STATE_KEY = 'kasanari:state';
@@ -75,6 +83,7 @@ app.innerHTML = `
         </div>
       </div>
       <div class="controls">
+        <button type="button" id="btn-hint">ヒント</button>
         <button type="button" id="btn-undo">もどす</button>
         <button type="button" id="btn-new" class="primary">新しいゲーム</button>
       </div>
@@ -98,7 +107,7 @@ app.innerHTML = `
         </div>
       </div>
     </div>
-    <p class="help" id="help">矢印キー・WASD・スワイプで全タイルが滑る。ぶつかった2枚の和が10だと消えて10点、同時消しでボーナス。<kbd>N</kbd>で新規、<kbd>U</kbd>でもどす。</p>
+    <p class="help" id="help">矢印キー・WASD・スワイプで全タイルが滑る。ぶつかった2枚の和が10だと消えて10点、同時消しでボーナス。<kbd>N</kbd>で新規、<kbd>U</kbd>でもどす、<kbd>H</kbd>でヒント。</p>
   </main>
   <footer class="site-footer">
     <p>スコアと盤面はこのブラウザにだけ保存される。MIT License</p>
@@ -117,6 +126,7 @@ const scoreStat = mustFind<HTMLDivElement>('.stat--score');
 const scoreEl = mustFind<HTMLSpanElement>('#score');
 const bestEl = mustFind<HTMLSpanElement>('#best');
 const comboEl = mustFind<HTMLSpanElement>('#combo');
+const btnHint = mustFind<HTMLButtonElement>('#btn-hint');
 const btnUndo = mustFind<HTMLButtonElement>('#btn-undo');
 const btnNew = mustFind<HTMLButtonElement>('#btn-new');
 const btnRetry = mustFind<HTMLButtonElement>('#btn-retry');
@@ -504,6 +514,34 @@ function fallbackCopy(text: string): boolean {
   }
 }
 
+/* ヒント: いま最も多く消える向きを短く示す */
+const DIR_LABELS: Record<Direction, string> = {
+  up: '上へ',
+  down: '下へ',
+  left: '左へ',
+  right: '右へ',
+};
+const HINT_DIRS = ['up', 'down', 'left', 'right'] as const;
+let hintTimer = 0;
+
+function hint(): void {
+  if (state.over) return;
+  const dir = suggestDirection(state);
+  if (!dir) {
+    showToast('動かせる向きがありません');
+    announce('動かせる向きがありません');
+    return;
+  }
+  showToast(`ヒント: ${DIR_LABELS[dir]}`);
+  announce(`ヒント: ${DIR_LABELS[dir]}`);
+  if (reduceMotion.matches) return;
+  for (const d of HINT_DIRS) board.classList.remove(`hint-${d}`);
+  void board.offsetWidth; // 連打でも確実に再生する
+  board.classList.add(`hint-${dir}`);
+  clearTimeout(hintTimer);
+  hintTimer = window.setTimeout(() => board.classList.remove(`hint-${dir}`), 700);
+}
+
 /* 入力 */
 const KEY_DIRS: Record<string, Direction> = {
   ArrowUp: 'up',
@@ -532,6 +570,9 @@ window.addEventListener('keydown', (e) => {
   } else if (k === 'n') {
     e.preventDefault();
     startNew(state.size);
+  } else if (k === 'h') {
+    e.preventDefault();
+    hint();
   }
 });
 
@@ -560,6 +601,7 @@ board.addEventListener('pointerup', (e) => {
   else applyMove(dy > 0 ? 'down' : 'up');
 });
 
+btnHint.addEventListener('click', hint);
 btnUndo.addEventListener('click', undo);
 btnNew.addEventListener('click', () => startNew(state.size));
 btnRetry.addEventListener('click', () => startNew(state.size));
