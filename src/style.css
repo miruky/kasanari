@@ -1,5 +1,5 @@
 :root {
-  color-scheme: light dark;
+  color-scheme: light;
 
   /* 8pxグリッドの余白スケール */
   --space-1: 4px;
@@ -59,39 +59,41 @@
   --t9-bg: #d2415f; --t9-fg: #ffffff;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #0d0f14;
-    --bg-tint: #11141b;
-    --surface: #171b23;
-    --surface-2: #1d222c;
-    --board: #12151d;
-    --cell: #1e2330;
-    --text: #e8ecf4;
-    --text-muted: #98a2b3;
-    --text-faint: #6b7585;
-    --border: #262c39;
-    --border-strong: #333a49;
-    --accent: #8b8cf5;
-    --accent-strong: #a3a4f8;
-    --accent-ink: #0d0f14;
-    --accent-weak: color-mix(in srgb, var(--accent) 16%, transparent);
+/* テーマは main.ts が data-theme をライト/ダークへ解決して付与する(システム追従も含む)。
+   inline スクリプトが初回描画前に設定するためちらつかない。 */
+:root[data-theme='dark'] {
+  color-scheme: dark;
 
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
-    --shadow-md: 0 2px 6px rgba(0, 0, 0, 0.4), 0 16px 40px rgba(0, 0, 0, 0.45);
-    --shadow-board: inset 0 1px 3px rgba(0, 0, 0, 0.5);
+  --bg: #0d0f14;
+  --bg-tint: #11141b;
+  --surface: #171b23;
+  --surface-2: #1d222c;
+  --board: #12151d;
+  --cell: #1e2330;
+  --text: #e8ecf4;
+  --text-muted: #98a2b3;
+  --text-faint: #6b7585;
+  --border: #262c39;
+  --border-strong: #333a49;
+  --accent: #8b8cf5;
+  --accent-strong: #a3a4f8;
+  --accent-ink: #0d0f14;
+  --accent-weak: color-mix(in srgb, var(--accent) 16%, transparent);
 
-    /* ダークでもタイルは視認性を保つため、寒暖は残しつつ明度を落とす */
-    --t1-bg: #28435f; --t1-fg: #dcebfb;
-    --t2-bg: #1f5159; --t2-fg: #d2f1f5;
-    --t3-bg: #1d5840; --t3-fg: #d2f4e2;
-    --t4-bg: #3a5520; --t4-fg: #e6f6cf;
-    --t5-bg: #5f5618; --t5-fg: #f6efba;
-    --t6-bg: #6f4f14; --t6-fg: #fbe2a6;
-    --t7-bg: #7a3f16; --t7-fg: #f8c89a;
-    --t8-bg: #8a3220; --t8-fg: #ffd9cc;
-    --t9-bg: #87263c; --t9-fg: #ffd2dd;
-  }
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 2px 6px rgba(0, 0, 0, 0.4), 0 16px 40px rgba(0, 0, 0, 0.45);
+  --shadow-board: inset 0 1px 3px rgba(0, 0, 0, 0.5);
+
+  /* ダークでもタイルは視認性を保つため、寒暖は残しつつ明度を落とす */
+  --t1-bg: #28435f; --t1-fg: #dcebfb;
+  --t2-bg: #1f5159; --t2-fg: #d2f1f5;
+  --t3-bg: #1d5840; --t3-fg: #d2f4e2;
+  --t4-bg: #3a5520; --t4-fg: #e6f6cf;
+  --t5-bg: #5f5618; --t5-fg: #f6efba;
+  --t6-bg: #6f4f14; --t6-fg: #fbe2a6;
+  --t7-bg: #7a3f16; --t7-fg: #f8c89a;
+  --t8-bg: #8a3220; --t8-fg: #ffd9cc;
+  --t9-bg: #87263c; --t9-fg: #ffd2dd;
 }
 
 *,
@@ -151,6 +153,10 @@ body {
   display: flex;
   align-items: center;
   gap: var(--space-3);
+  min-width: 0;
+}
+
+.brand-text {
   min-width: 0;
 }
 
@@ -352,6 +358,73 @@ button.primary:hover {
   outline-offset: 2px;
 }
 
+/* オプション(盤面サイズ・テーマ・共有) */
+.options {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.seg {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  background: var(--surface);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.seg-btn {
+  min-height: 34px;
+  padding: 0 var(--space-3);
+  font-size: 0.8rem;
+  font-weight: 650;
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+  border-radius: 10px;
+  box-shadow: none;
+  font-variant-numeric: tabular-nums;
+}
+
+.seg-btn:hover {
+  color: var(--text);
+  background: var(--surface-2);
+  border-color: transparent;
+  transform: none;
+}
+
+.seg-btn.is-active,
+.seg-btn.is-active:hover {
+  color: var(--accent-ink);
+  background: var(--accent);
+}
+
+.options-right {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.icon-btn {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  min-height: 40px;
+  padding: 0;
+  color: var(--text-muted);
+}
+
+.icon-btn:hover {
+  color: var(--text);
+}
+
+.icon-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
 /* 盤面 */
 .board-wrap {
   display: flex;
@@ -359,6 +432,7 @@ button.primary:hover {
 }
 
 .board {
+  --size: 4;
   position: relative;
   width: 100%;
   aspect-ratio: 1;
@@ -379,8 +453,8 @@ button.primary:hover {
 
 .cells {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  grid-template-rows: repeat(4, 1fr);
+  grid-template-columns: repeat(var(--size), 1fr);
+  grid-template-rows: repeat(var(--size), 1fr);
 }
 
 .cell {
@@ -394,14 +468,15 @@ button.primary:hover {
   position: absolute;
   top: 0;
   left: 0;
-  width: 25%;
-  height: 25%;
+  width: calc(100% / var(--size));
+  height: calc(100% / var(--size));
   border: var(--gap) solid transparent;
   background-clip: padding-box;
   border-radius: var(--radius-tile);
   display: grid;
   place-items: center;
-  font-size: 8.4cqi;
+  /* 盤が大きいほどタイルが小さくなるので、文字もサイズに反比例させる */
+  font-size: calc(33cqi / var(--size));
   font-weight: 750;
   font-variant-numeric: tabular-nums;
   line-height: 1;
@@ -447,8 +522,8 @@ button.primary:hover {
   position: absolute;
   top: 0;
   left: 0;
-  width: 25%;
-  height: 25%;
+  width: calc(100% / var(--size));
+  height: calc(100% / var(--size));
   border-radius: var(--radius-tile);
   background: transparent;
   pointer-events: none;
@@ -543,6 +618,31 @@ button.primary:hover {
   text-align: center;
   font-size: 0.76rem;
   color: var(--text-faint);
+}
+
+/* 共有のフィードバックなどの短い通知。スクリーンリーダーにも読み上げられる。 */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: var(--space-5);
+  transform: translateX(-50%) translateY(10px);
+  max-width: calc(100vw - 32px);
+  padding: var(--space-2) var(--space-4);
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--accent-ink);
+  background: var(--text);
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-md);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 10;
+  transition: opacity 0.25s var(--ease), transform 0.25s var(--ease);
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
 }
 
 @media (max-width: 380px) {
