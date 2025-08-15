@@ -1,5 +1,14 @@
 import { describe, expect, it } from 'vitest';
-import { BOARD_SIZES, createRng, isStuck, move, newGame, resumableRng, spawnValue } from './engine';
+import {
+  BOARD_SIZES,
+  createRng,
+  isStuck,
+  isValidState,
+  move,
+  newGame,
+  resumableRng,
+  spawnValue,
+} from './engine';
 import type { Direction, GameState, Tile } from './engine';
 
 function stateWith(tiles: [number, number, number][], size = 4): GameState {
@@ -260,5 +269,59 @@ describe('再開可能な乱数', () => {
     const a = newGame(resumableRng(2024).next, 5);
     const b = newGame(resumableRng(2024).next, 5);
     expect(a.tiles).toEqual(b.tiles);
+  });
+});
+
+describe('保存値の検証', () => {
+  it('実際に生成した盤面は正しいと判定する', () => {
+    expect(isValidState(newGame(createRng(3), 4))).toBe(true);
+    expect(isValidState(newGame(createRng(3), 6))).toBe(true);
+    const played = move(newGame(createRng(8), 5), 'left', createRng(8)).state;
+    expect(isValidState(played)).toBe(true);
+  });
+
+  it('壊れた値・盤外・重なり・非常識なサイズは弾く', () => {
+    expect(isValidState(null)).toBe(false);
+    expect(isValidState('{}')).toBe(false);
+    expect(isValidState({ size: 4, tiles: [], score: 0, bestCombo: 0, over: false })).toBe(false); // nextId 欠落
+    expect(isValidState({ size: 9999, tiles: [], score: 0, bestCombo: 0, over: false, nextId: 1 })).toBe(
+      false,
+    );
+    // 盤外のタイル
+    expect(
+      isValidState({
+        size: 4,
+        tiles: [{ id: 1, value: 3, row: 9, col: 0 }],
+        score: 0,
+        bestCombo: 0,
+        over: false,
+        nextId: 2,
+      }),
+    ).toBe(false);
+    // 同じマスに2枚
+    expect(
+      isValidState({
+        size: 4,
+        tiles: [
+          { id: 1, value: 3, row: 0, col: 0 },
+          { id: 2, value: 7, row: 0, col: 0 },
+        ],
+        score: 0,
+        bestCombo: 0,
+        over: false,
+        nextId: 3,
+      }),
+    ).toBe(false);
+    // 範囲外のタイル値
+    expect(
+      isValidState({
+        size: 4,
+        tiles: [{ id: 1, value: 12, row: 0, col: 0 }],
+        score: 0,
+        bestCombo: 0,
+        over: false,
+        nextId: 2,
+      }),
+    ).toBe(false);
   });
 });
