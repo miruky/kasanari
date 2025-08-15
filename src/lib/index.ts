@@ -4,6 +4,7 @@ export {
   TARGET_SUM,
   createRng,
   isStuck,
+  isValidState,
   move,
   newGame,
   resumableRng,
