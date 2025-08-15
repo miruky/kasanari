@@ -48,15 +48,24 @@
 
   /* 和10の対(1+9, 2+8, …)を寒色と暖色の両端に割り当てた温度ランプ。
      相方どうしが色相環の反対側に来るので一目で見分けやすい。 */
-  --t1-bg: #d6e4f4; --t1-fg: #22324a;
-  --t2-bg: #c3e6ea; --t2-fg: #103a42;
-  --t3-bg: #aee3c7; --t3-fg: #0f3a2b;
-  --t4-bg: #c7e6a4; --t4-fg: #233909;
-  --t5-bg: #ece08a; --t5-fg: #3d3505;
-  --t6-bg: #f6cd76; --t6-fg: #432d05;
-  --t7-bg: #f2a45c; --t7-fg: #46280a;
-  --t8-bg: #e36b46; --t8-fg: #ffffff;
-  --t9-bg: #d2415f; --t9-fg: #ffffff;
+  --t1-bg: #d6e4f4;
+  --t1-fg: #22324a;
+  --t2-bg: #c3e6ea;
+  --t2-fg: #103a42;
+  --t3-bg: #aee3c7;
+  --t3-fg: #0f3a2b;
+  --t4-bg: #c7e6a4;
+  --t4-fg: #233909;
+  --t5-bg: #ece08a;
+  --t5-fg: #3d3505;
+  --t6-bg: #f6cd76;
+  --t6-fg: #432d05;
+  --t7-bg: #f2a45c;
+  --t7-fg: #46280a;
+  --t8-bg: #e36b46;
+  --t8-fg: #ffffff;
+  --t9-bg: #d2415f;
+  --t9-fg: #ffffff;
 }
 
 /* テーマは main.ts が data-theme をライト/ダークへ解決して付与する(システム追従も含む)。
@@ -85,15 +94,24 @@
   --shadow-board: inset 0 1px 3px rgba(0, 0, 0, 0.5);
 
   /* ダークでもタイルは視認性を保つため、寒暖は残しつつ明度を落とす */
-  --t1-bg: #28435f; --t1-fg: #dcebfb;
-  --t2-bg: #1f5159; --t2-fg: #d2f1f5;
-  --t3-bg: #1d5840; --t3-fg: #d2f4e2;
-  --t4-bg: #3a5520; --t4-fg: #e6f6cf;
-  --t5-bg: #5f5618; --t5-fg: #f6efba;
-  --t6-bg: #6f4f14; --t6-fg: #fbe2a6;
-  --t7-bg: #7a3f16; --t7-fg: #f8c89a;
-  --t8-bg: #8a3220; --t8-fg: #ffd9cc;
-  --t9-bg: #87263c; --t9-fg: #ffd2dd;
+  --t1-bg: #28435f;
+  --t1-fg: #dcebfb;
+  --t2-bg: #1f5159;
+  --t2-fg: #d2f1f5;
+  --t3-bg: #1d5840;
+  --t3-fg: #d2f4e2;
+  --t4-bg: #3a5520;
+  --t4-fg: #e6f6cf;
+  --t5-bg: #5f5618;
+  --t5-fg: #f6efba;
+  --t6-bg: #6f4f14;
+  --t6-fg: #fbe2a6;
+  --t7-bg: #7a3f16;
+  --t7-fg: #f8c89a;
+  --t8-bg: #8a3220;
+  --t8-fg: #ffd9cc;
+  --t9-bg: #87263c;
+  --t9-fg: #ffd2dd;
 }
 
 *,
@@ -112,11 +130,7 @@ body {
   font-family: var(--font-sans);
   color: var(--text);
   background-color: var(--bg);
-  background-image: radial-gradient(
-    130% 110% at 50% -10%,
-    var(--accent-weak),
-    transparent 45%
-  );
+  background-image: radial-gradient(130% 110% at 50% -10%, var(--accent-weak), transparent 45%);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
@@ -131,8 +145,14 @@ body {
 }
 
 @keyframes app-in {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .stage {
@@ -190,7 +210,9 @@ body {
   text-decoration: none;
   padding: var(--space-2) var(--space-3);
   border-radius: var(--radius-pill);
-  transition: color 0.18s var(--ease), background 0.18s var(--ease);
+  transition:
+    color 0.18s var(--ease),
+    background 0.18s var(--ease);
 }
 
 .repo-link svg {
@@ -276,9 +298,15 @@ body {
 }
 
 @keyframes bump {
-  0% { scale: 1; }
-  35% { scale: 1.2; }
-  100% { scale: 1; }
+  0% {
+    scale: 1;
+  }
+  35% {
+    scale: 1.2;
+  }
+  100% {
+    scale: 1;
+  }
 }
 
 /* 得点の浮き上がり「+N」 */
@@ -296,9 +324,18 @@ body {
 }
 
 @keyframes gain {
-  0% { opacity: 0; transform: translateY(8px) scale(0.9); }
-  28% { opacity: 1; transform: translateY(0) scale(1); }
-  100% { opacity: 0; transform: translateY(-16px) scale(1); }
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.9);
+  }
+  28% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-16px) scale(1);
+  }
 }
 
 .controls {
@@ -487,15 +524,42 @@ button.primary:hover {
   forced-color-adjust: none;
 }
 
-.tile.v1 { background-color: var(--t1-bg); color: var(--t1-fg); }
-.tile.v2 { background-color: var(--t2-bg); color: var(--t2-fg); }
-.tile.v3 { background-color: var(--t3-bg); color: var(--t3-fg); }
-.tile.v4 { background-color: var(--t4-bg); color: var(--t4-fg); }
-.tile.v5 { background-color: var(--t5-bg); color: var(--t5-fg); }
-.tile.v6 { background-color: var(--t6-bg); color: var(--t6-fg); }
-.tile.v7 { background-color: var(--t7-bg); color: var(--t7-fg); }
-.tile.v8 { background-color: var(--t8-bg); color: var(--t8-fg); }
-.tile.v9 { background-color: var(--t9-bg); color: var(--t9-fg); }
+.tile.v1 {
+  background-color: var(--t1-bg);
+  color: var(--t1-fg);
+}
+.tile.v2 {
+  background-color: var(--t2-bg);
+  color: var(--t2-fg);
+}
+.tile.v3 {
+  background-color: var(--t3-bg);
+  color: var(--t3-fg);
+}
+.tile.v4 {
+  background-color: var(--t4-bg);
+  color: var(--t4-fg);
+}
+.tile.v5 {
+  background-color: var(--t5-bg);
+  color: var(--t5-fg);
+}
+.tile.v6 {
+  background-color: var(--t6-bg);
+  color: var(--t6-fg);
+}
+.tile.v7 {
+  background-color: var(--t7-bg);
+  color: var(--t7-fg);
+}
+.tile.v8 {
+  background-color: var(--t8-bg);
+  color: var(--t8-fg);
+}
+.tile.v9 {
+  background-color: var(--t9-bg);
+  color: var(--t9-fg);
+}
 
 /* main.ts がインライン transform で位置を書くため、出現と消滅は transform と
    独立に合成される scale / opacity だけで表し、移動と干渉させない。 */
@@ -509,15 +573,32 @@ button.primary:hover {
 }
 
 @keyframes pop {
-  0% { scale: 0.4; opacity: 0; }
-  70% { scale: 1.06; }
-  100% { scale: 1; opacity: 1; }
+  0% {
+    scale: 0.4;
+    opacity: 0;
+  }
+  70% {
+    scale: 1.06;
+  }
+  100% {
+    scale: 1;
+    opacity: 1;
+  }
 }
 
 @keyframes vanish {
-  0% { scale: 1; opacity: 1; }
-  35% { scale: 1.12; opacity: 1; }
-  100% { scale: 0.25; opacity: 0; }
+  0% {
+    scale: 1;
+    opacity: 1;
+  }
+  35% {
+    scale: 1.12;
+    opacity: 1;
+  }
+  100% {
+    scale: 0.25;
+    opacity: 0;
+  }
 }
 
 /* 消えたマスから広がる輪 */
@@ -535,8 +616,16 @@ button.primary:hover {
 }
 
 @keyframes burst {
-  0% { box-shadow: 0 0 0 1px var(--accent); opacity: 0.65; scale: 0.82; }
-  100% { box-shadow: 0 0 0 7px var(--accent); opacity: 0; scale: 1.28; }
+  0% {
+    box-shadow: 0 0 0 1px var(--accent);
+    opacity: 0.65;
+    scale: 0.82;
+  }
+  100% {
+    box-shadow: 0 0 0 7px var(--accent);
+    opacity: 0;
+    scale: 1.28;
+  }
 }
 
 /* 同時消しのフラッシュ */
@@ -555,8 +644,79 @@ button.primary:hover {
 }
 
 @keyframes combo {
-  0% { box-shadow: inset 0 0 0 3px var(--accent); opacity: 0.7; }
-  100% { box-shadow: inset 0 0 0 16px var(--accent); opacity: 0; }
+  0% {
+    box-shadow: inset 0 0 0 3px var(--accent);
+    opacity: 0.7;
+  }
+  100% {
+    box-shadow: inset 0 0 0 16px var(--accent);
+    opacity: 0;
+  }
+}
+
+/* ヒントの向きを示す端のグロー(その向きへ滑らせるとよい合図) */
+.board::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 4;
+}
+
+.board.hint-up::before {
+  animation: hint-up 0.7s var(--ease-out);
+}
+.board.hint-down::before {
+  animation: hint-down 0.7s var(--ease-out);
+}
+.board.hint-left::before {
+  animation: hint-left 0.7s var(--ease-out);
+}
+.board.hint-right::before {
+  animation: hint-right 0.7s var(--ease-out);
+}
+
+@keyframes hint-up {
+  0% {
+    opacity: 0.8;
+    box-shadow: inset 0 12px 26px -10px var(--accent);
+  }
+  100% {
+    opacity: 0;
+    box-shadow: inset 0 12px 26px -10px var(--accent);
+  }
+}
+@keyframes hint-down {
+  0% {
+    opacity: 0.8;
+    box-shadow: inset 0 -12px 26px -10px var(--accent);
+  }
+  100% {
+    opacity: 0;
+    box-shadow: inset 0 -12px 26px -10px var(--accent);
+  }
+}
+@keyframes hint-left {
+  0% {
+    opacity: 0.8;
+    box-shadow: inset 12px 0 26px -10px var(--accent);
+  }
+  100% {
+    opacity: 0;
+    box-shadow: inset 12px 0 26px -10px var(--accent);
+  }
+}
+@keyframes hint-right {
+  0% {
+    opacity: 0.8;
+    box-shadow: inset -12px 0 26px -10px var(--accent);
+  }
+  100% {
+    opacity: 0;
+    box-shadow: inset -12px 0 26px -10px var(--accent);
+  }
 }
 
 /* 手詰まりオーバーレイ */
@@ -583,9 +743,15 @@ button.primary:hover {
   animation: overlay-in 0.42s var(--ease-out) both;
 }
 
-.overlay > *:nth-child(1) { animation-delay: 0.06s; }
-.overlay > *:nth-child(2) { animation-delay: 0.13s; }
-.overlay > *:nth-child(3) { animation-delay: 0.2s; }
+.overlay > *:nth-child(1) {
+  animation-delay: 0.06s;
+}
+.overlay > *:nth-child(2) {
+  animation-delay: 0.13s;
+}
+.overlay > *:nth-child(3) {
+  animation-delay: 0.2s;
+}
 
 .over-title {
   font-size: 1.7rem;
@@ -603,13 +769,23 @@ button.primary:hover {
 }
 
 @keyframes fade {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes overlay-in {
-  from { opacity: 0; transform: translateY(10px) scale(0.97); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .help {
@@ -671,7 +847,9 @@ button.primary:hover {
   opacity: 0;
   pointer-events: none;
   z-index: 10;
-  transition: opacity 0.25s var(--ease), transform 0.25s var(--ease);
+  transition:
+    opacity 0.25s var(--ease),
+    transform 0.25s var(--ease);
 }
 
 .toast.show {
