@@ -186,6 +186,36 @@ export function move(state: GameState, dir: Direction, rng: () => number): MoveR
   return { state: next, moved: true, pairs, removed, gained };
 }
 
+/**
+ * 保存値などの外から来た値が、そのまま遊べる正しい盤面かを検証する。
+ * サイズ・得点・各タイルの形と盤内位置・マスの重なりを確かめる。
+ */
+export function isValidState(value: unknown): value is GameState {
+  if (typeof value !== 'object' || value === null) return false;
+  const s = value as Partial<GameState>;
+  if (typeof s.size !== 'number' || !Number.isInteger(s.size) || s.size < 2 || s.size > 12) {
+    return false;
+  }
+  if (typeof s.score !== 'number' || !Number.isFinite(s.score)) return false;
+  if (typeof s.bestCombo !== 'number' || !Number.isFinite(s.bestCombo)) return false;
+  if (typeof s.nextId !== 'number' || !Number.isFinite(s.nextId)) return false;
+  if (typeof s.over !== 'boolean') return false;
+  if (!Array.isArray(s.tiles)) return false;
+  const seen = new Set<string>();
+  for (const t of s.tiles) {
+    if (typeof t !== 'object' || t === null) return false;
+    const tile = t as Partial<Tile>;
+    if (typeof tile.id !== 'number') return false;
+    if (typeof tile.value !== 'number' || tile.value < 1 || tile.value > 9) return false;
+    if (typeof tile.row !== 'number' || tile.row < 0 || tile.row >= s.size) return false;
+    if (typeof tile.col !== 'number' || tile.col < 0 || tile.col >= s.size) return false;
+    const key = `${tile.row}:${tile.col}`;
+    if (seen.has(key)) return false; // 1マスに複数タイルは不正
+    seen.add(key);
+  }
+  return true;
+}
+
 /** 空きがなく、隣接にも和10の組がなければ手詰まり */
 export function isStuck(tiles: readonly Tile[], size: number): boolean {
   if (tiles.length < size * size) return false;
