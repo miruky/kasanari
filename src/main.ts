@@ -92,13 +92,13 @@ app.innerHTML = `
         <div class="cells" id="cells" aria-hidden="true"></div>
         <div class="tiles" id="tiles"></div>
         <div class="overlay" id="overlay" hidden>
-          <p class="over-title">手詰まり</p>
+          <p class="over-title" id="over-title">手詰まり</p>
           <p class="over-score" id="over-score"></p>
           <button type="button" class="primary" id="btn-retry">もう一度</button>
         </div>
       </div>
     </div>
-    <p class="help" id="help">矢印キー・WASD・スワイプで全タイルが滑る。ぶつかった2枚の和が10だと消えて10点。同時に複数組消すとボーナス。</p>
+    <p class="help" id="help">矢印キー・WASD・スワイプで全タイルが滑る。ぶつかった2枚の和が10だと消えて10点、同時消しでボーナス。<kbd>N</kbd>で新規、<kbd>U</kbd>でもどす。</p>
   </main>
   <footer class="site-footer">
     <p>スコアと盤面はこのブラウザにだけ保存される。MIT License</p>
@@ -111,6 +111,7 @@ const board = mustFind<HTMLDivElement>('#board');
 const cellsLayer = mustFind<HTMLDivElement>('#cells');
 const tilesLayer = mustFind<HTMLDivElement>('#tiles');
 const overlay = mustFind<HTMLDivElement>('#overlay');
+const overTitle = mustFind<HTMLParagraphElement>('#over-title');
 const overScore = mustFind<HTMLParagraphElement>('#over-score');
 const scoreStat = mustFind<HTMLDivElement>('.stat--score');
 const scoreEl = mustFind<HTMLSpanElement>('#score');
@@ -149,6 +150,8 @@ function randomSeed(): number {
 let state: GameState;
 let undoStack: GameState[] = [];
 let best = 0;
+/** このゲーム開始時点のベスト。手詰まり時に「自己ベスト更新」を判定するための基準。 */
+let recordBaseline = 0;
 
 function bestKey(size: number): string {
   return `${BEST_PREFIX}${size}`;
@@ -364,7 +367,7 @@ function renderAll(): void {
   tileEls.clear();
   state.tiles.forEach((t, i) => createTileEl(t.id, t.value, t.row, t.col, i * 35));
   overlay.hidden = !state.over;
-  if (state.over) overScore.textContent = `スコア ${state.score}`;
+  if (state.over) showGameOver();
   renderHud();
   syncSizeButtons();
 }
@@ -431,16 +434,24 @@ function applyMove(dir: Direction): void {
   if (state.bestCombo > before.bestCombo) bump(comboEl);
 
   overlay.hidden = !state.over;
-  if (state.over) {
-    overScore.textContent = `スコア ${state.score}`;
-    announce(`手詰まり。スコア${state.score}点。「もう一度」で再開できます。`);
-    btnRetry.focus();
-  }
+  if (state.over) showGameOver();
+}
+
+function showGameOver(): void {
+  const isRecord = best > recordBaseline && recordBaseline > 0;
+  overTitle.textContent = isRecord ? '自己ベスト更新' : '手詰まり';
+  overlay.classList.toggle('is-record', isRecord);
+  overScore.textContent = `スコア ${state.score} ・ ベスト ${best}`;
+  announce(
+    `${isRecord ? '自己ベスト更新。' : '手詰まり。'}スコア${state.score}点。「もう一度」で再開できます。`,
+  );
+  btnRetry.focus();
 }
 
 function startNew(size: number, withSeed?: number): void {
   seedGame(withSeed ?? randomSeed());
   best = loadBest(size);
+  recordBaseline = best;
   state = newGame(rng.next, size);
   undoStack = [];
   persist();
@@ -589,6 +600,7 @@ if (urlSeed !== null && /^\d+$/.test(urlSeed)) {
     seedGame(saved.seed, saved.draws);
     state = saved.state;
     best = loadBest(state.size);
+    recordBaseline = best;
     undoStack = [];
     renderAll();
     board.focus();
