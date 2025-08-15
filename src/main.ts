@@ -1,5 +1,5 @@
 import './style.css';
-import { BOARD_SIZES, SIZE, move, newGame, resumableRng } from './lib';
+import { BOARD_SIZES, SIZE, isValidState, move, newGame, resumableRng } from './lib';
 import type { Direction, GameState, ResumableRng } from './lib';
 
 const STATE_KEY = 'kasanari:state';
@@ -87,7 +87,8 @@ app.innerHTML = `
       </div>
     </div>
     <div class="board-wrap">
-      <div class="board" id="board" tabindex="0" aria-label="盤面">
+      <div class="board" id="board" tabindex="0" role="application"
+        aria-label="盤面" aria-describedby="help">
         <div class="cells" id="cells" aria-hidden="true"></div>
         <div class="tiles" id="tiles"></div>
         <div class="overlay" id="overlay" hidden>
@@ -97,12 +98,13 @@ app.innerHTML = `
         </div>
       </div>
     </div>
-    <p class="help">矢印キー・WASD・スワイプで全タイルが滑る。ぶつかった2枚の和が10だと消えて10点。同時に複数組消すとボーナス。</p>
+    <p class="help" id="help">矢印キー・WASD・スワイプで全タイルが滑る。ぶつかった2枚の和が10だと消えて10点。同時に複数組消すとボーナス。</p>
   </main>
   <footer class="site-footer">
     <p>スコアと盤面はこのブラウザにだけ保存される。MIT License</p>
   </footer>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <p class="sr-only" id="status" role="status" aria-live="polite"></p>
 `;
 
 const board = mustFind<HTMLDivElement>('#board');
@@ -121,7 +123,13 @@ const btnTheme = mustFind<HTMLButtonElement>('#btn-theme');
 const btnShare = mustFind<HTMLButtonElement>('#btn-share');
 const sizeGroup = mustFind<HTMLDivElement>('#size-group');
 const toast = mustFind<HTMLDivElement>('#toast');
+const statusEl = mustFind<HTMLParagraphElement>('#status');
 const metaTheme = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
+
+/** スクリーンリーダー向けの状態通知。視覚的には出さない。 */
+function announce(message: string): void {
+  statusEl.textContent = message;
+}
 
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
@@ -183,19 +191,17 @@ function restore(): Saved | null {
     const parsed: unknown = JSON.parse(raw);
     const s = (parsed as { state?: unknown }).state;
     if (
-      typeof s === 'object' &&
-      s !== null &&
-      Array.isArray((s as GameState).tiles) &&
-      typeof (s as GameState).score === 'number' &&
-      typeof (s as GameState).size === 'number' &&
-      !(s as GameState).over &&
-      (s as GameState).tiles.length > 0
+      isValidState(s) &&
+      !s.over &&
+      s.tiles.length > 0 &&
+      (BOARD_SIZES as readonly number[]).includes(s.size)
     ) {
       const p = parsed as { seed?: unknown; draws?: unknown };
+      const draws = Number(p.draws);
       return {
-        state: s as GameState,
+        state: s,
         seed: Number(p.seed) >>> 0,
-        draws: Number(p.draws) || 0,
+        draws: Number.isFinite(draws) && draws >= 0 ? Math.floor(draws) : 0,
       };
     }
   } catch {
@@ -425,7 +431,11 @@ function applyMove(dir: Direction): void {
   if (state.bestCombo > before.bestCombo) bump(comboEl);
 
   overlay.hidden = !state.over;
-  if (state.over) overScore.textContent = `スコア ${state.score}`;
+  if (state.over) {
+    overScore.textContent = `スコア ${state.score}`;
+    announce(`手詰まり。スコア${state.score}点。「もう一度」で再開できます。`);
+    btnRetry.focus();
+  }
 }
 
 function startNew(size: number, withSeed?: number): void {
@@ -436,6 +446,7 @@ function startNew(size: number, withSeed?: number): void {
   persist();
   renderAll();
   board.focus();
+  announce(`${size}×${size}の新しいゲームを開始`);
 }
 
 function undo(): void {
@@ -516,6 +527,17 @@ window.addEventListener('keydown', (e) => {
 let touchStart: { x: number; y: number } | null = null;
 board.addEventListener('pointerdown', (e) => {
   touchStart = { x: e.clientX, y: e.clientY };
+  // 指がスワイプ中に盤外へ出ても pointerup を盤で受け取れるよう捕捉する
+  if (e.pointerType !== 'mouse') {
+    try {
+      board.setPointerCapture(e.pointerId);
+    } catch {
+      // 捕捉できない環境でも通常どおり動く
+    }
+  }
+});
+board.addEventListener('pointercancel', () => {
+  touchStart = null;
 });
 board.addEventListener('pointerup', (e) => {
   if (!touchStart) return;
@@ -556,7 +578,11 @@ if (urlSeed !== null && /^\d+$/.test(urlSeed)) {
   const size = (BOARD_SIZES as readonly number[]).includes(urlSize) ? urlSize : SIZE;
   startNew(size, Number(urlSeed));
   // リロード時に同じ配置へ戻らないようクエリを消す(進行は通常どおり保存される)
-  history.replaceState(null, '', location.pathname);
+  try {
+    history.replaceState(null, '', location.pathname);
+  } catch {
+    // 履歴を触れない環境でも続行する
+  }
 } else {
   const saved = restore();
   if (saved) {
