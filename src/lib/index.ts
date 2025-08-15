@@ -10,5 +10,6 @@ export {
   resumableRng,
   spawnTile,
   spawnValue,
+  suggestDirection,
 } from './engine';
 export type { Direction, GameState, MoveResult, ResumableRng, Tile } from './engine';

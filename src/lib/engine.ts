@@ -216,6 +216,27 @@ export function isValidState(value: unknown): value is GameState {
   return true;
 }
 
+const ALL_DIRS: readonly Direction[] = ['up', 'down', 'left', 'right'];
+
+/**
+ * いまの盤面で最も多くの組が消える向きを返す。同点なら少しでも動く向きを優先し、
+ * どの向きでも動かなければ null。ヒント表示に使う。
+ * 盤面そのものは変えない(各向きを試した結果の pairs だけを見て、スポーンは捨てる)。
+ */
+export function suggestDirection(state: GameState): Direction | null {
+  let best: Direction | null = null;
+  let bestPairs = -1;
+  for (const dir of ALL_DIRS) {
+    const result = move(state, dir, () => 0);
+    if (!result.moved) continue;
+    if (result.pairs > bestPairs) {
+      bestPairs = result.pairs;
+      best = dir;
+    }
+  }
+  return best;
+}
+
 /** 空きがなく、隣接にも和10の組がなければ手詰まり */
 export function isStuck(tiles: readonly Tile[], size: number): boolean {
   if (tiles.length < size * size) return false;

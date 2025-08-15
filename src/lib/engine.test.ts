@@ -8,6 +8,7 @@ import {
   newGame,
   resumableRng,
   spawnValue,
+  suggestDirection,
 } from './engine';
 import type { Direction, GameState, Tile } from './engine';
 
@@ -144,6 +145,37 @@ describe('手詰まり', () => {
       for (let c = 0; c < 4; c++) tiles.push([r, c, ((r + c) % 2 === 0 ? 1 : 2) as number]);
     }
     expect(isStuck(stateWith(tiles).tiles, 4)).toBe(true);
+  });
+});
+
+describe('ヒント(suggestDirection)', () => {
+  it('消せる向きがあれば、その向きを返す', () => {
+    const state = stateWith([
+      [0, 0, 4],
+      [0, 2, 6],
+    ]);
+    const dir = suggestDirection(state);
+    expect(dir).not.toBeNull();
+    // 返った向きで実際に1組以上が消える
+    expect(move(state, dir as Direction, () => 0).pairs).toBeGreaterThanOrEqual(1);
+  });
+
+  it('消せないが動かせるなら、動く向きを返す', () => {
+    const dir = suggestDirection(stateWith([[0, 0, 3]]));
+    expect(dir).not.toBeNull();
+  });
+
+  it('どの向きにも動かせなければ null', () => {
+    const state = stateWith(
+      [
+        [0, 0, 1],
+        [0, 1, 2],
+        [1, 0, 2],
+        [1, 1, 1],
+      ],
+      2,
+    );
+    expect(suggestDirection(state)).toBeNull();
   });
 });
 
@@ -284,9 +316,9 @@ describe('保存値の検証', () => {
     expect(isValidState(null)).toBe(false);
     expect(isValidState('{}')).toBe(false);
     expect(isValidState({ size: 4, tiles: [], score: 0, bestCombo: 0, over: false })).toBe(false); // nextId 欠落
-    expect(isValidState({ size: 9999, tiles: [], score: 0, bestCombo: 0, over: false, nextId: 1 })).toBe(
-      false,
-    );
+    expect(
+      isValidState({ size: 9999, tiles: [], score: 0, bestCombo: 0, over: false, nextId: 1 }),
+    ).toBe(false);
     // 盤外のタイル
     expect(
       isValidState({
