@@ -593,6 +593,10 @@ button.primary:hover {
   letter-spacing: -0.01em;
 }
 
+.overlay.is-record .over-title {
+  color: var(--accent);
+}
+
 .over-score {
   color: var(--text-muted);
   font-variant-numeric: tabular-nums;
@@ -615,6 +619,19 @@ button.primary:hover {
   text-wrap: balance;
   max-width: 46ch;
   margin-inline: auto;
+}
+
+.help kbd {
+  display: inline-block;
+  padding: 1px 6px;
+  font-family: var(--font-sans);
+  font-size: 0.82em;
+  font-weight: 700;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  box-shadow: var(--shadow-sm);
 }
 
 .site-footer {
