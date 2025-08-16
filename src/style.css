@@ -752,6 +752,9 @@ button.primary:hover {
 .overlay > *:nth-child(3) {
   animation-delay: 0.2s;
 }
+.overlay > *:nth-child(4) {
+  animation-delay: 0.27s;
+}
 
 .over-title {
   font-size: 1.7rem;
@@ -766,6 +769,15 @@ button.primary:hover {
 .over-score {
   color: var(--text-muted);
   font-variant-numeric: tabular-nums;
+}
+
+.over-stats {
+  margin-top: -8px;
+  font-size: 0.78rem;
+  color: var(--text-faint);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  text-wrap: balance;
 }
 
 @keyframes fade {

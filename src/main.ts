@@ -2,15 +2,19 @@ import './style.css';
 import {
   BOARD_SIZES,
   SIZE,
+  emptyStats,
+  isStats,
   isValidState,
   move,
   newGame,
+  recordGame,
   resumableRng,
   suggestDirection,
 } from './lib';
-import type { Direction, GameState, ResumableRng } from './lib';
+import type { Direction, GameState, ResumableRng, Stats } from './lib';
 
 const STATE_KEY = 'kasanari:state';
+const STATS_KEY = 'kasanari:stats';
 const BEST_PREFIX = 'kasanari:best:';
 const LEGACY_BEST_KEY = 'kasanari:best';
 const THEME_KEY = 'kasanari:theme';
@@ -103,6 +107,7 @@ app.innerHTML = `
         <div class="overlay" id="overlay" hidden>
           <p class="over-title" id="over-title">手詰まり</p>
           <p class="over-score" id="over-score"></p>
+          <p class="over-stats" id="over-stats"></p>
           <button type="button" class="primary" id="btn-retry">もう一度</button>
         </div>
       </div>
@@ -122,6 +127,7 @@ const tilesLayer = mustFind<HTMLDivElement>('#tiles');
 const overlay = mustFind<HTMLDivElement>('#overlay');
 const overTitle = mustFind<HTMLParagraphElement>('#over-title');
 const overScore = mustFind<HTMLParagraphElement>('#over-score');
+const overStats = mustFind<HTMLParagraphElement>('#over-stats');
 const scoreStat = mustFind<HTMLDivElement>('.stat--score');
 const scoreEl = mustFind<HTMLSpanElement>('#score');
 const bestEl = mustFind<HTMLSpanElement>('#best');
@@ -160,6 +166,28 @@ function randomSeed(): number {
 let state: GameState;
 let undoStack: GameState[] = [];
 let best = 0;
+let stats: Stats = loadStats();
+
+function loadStats(): Stats {
+  try {
+    const raw = localStorage.getItem(STATS_KEY);
+    if (raw !== null) {
+      const parsed: unknown = JSON.parse(raw);
+      if (isStats(parsed)) return parsed;
+    }
+  } catch {
+    // 壊れた値は空の通算成績から始める
+  }
+  return emptyStats();
+}
+
+function saveStats(): void {
+  try {
+    localStorage.setItem(STATS_KEY, JSON.stringify(stats));
+  } catch {
+    // 保存できなくても遊べる
+  }
+}
 /** このゲーム開始時点のベスト。手詰まり時に「自己ベスト更新」を判定するための基準。 */
 let recordBaseline = 0;
 
@@ -444,6 +472,10 @@ function applyMove(dir: Direction): void {
   if (state.bestCombo > before.bestCombo) bump(comboEl);
 
   overlay.hidden = !state.over;
+  if (state.over && !before.over) {
+    stats = recordGame(stats, state.score, state.bestCombo);
+    saveStats();
+  }
   if (state.over) showGameOver();
 }
 
@@ -452,6 +484,7 @@ function showGameOver(): void {
   overTitle.textContent = isRecord ? '自己ベスト更新' : '手詰まり';
   overlay.classList.toggle('is-record', isRecord);
   overScore.textContent = `スコア ${state.score} ・ ベスト ${best}`;
+  overStats.textContent = `通算 ${stats.games} 戦 ・ 最高コンボ ${stats.bestCombo} ・ 最高スコア ${stats.bestScore}`;
   announce(
     `${isRecord ? '自己ベスト更新。' : '手詰まり。'}スコア${state.score}点。「もう一度」で再開できます。`,
   );
